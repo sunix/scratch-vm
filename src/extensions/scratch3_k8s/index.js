@@ -11,22 +11,7 @@ class Scratch3K8sBlocks {
 
     constructor(runtime) {
         this.runtime = runtime;
-        this.namespace = "che";
-
-        this.getPodsPromise = new Promise((resolve, reject) => {
-            nets({
-                url: urlBase.replace("http://", "https://") // quick dirty fix should use https
-                    + this.namespace,
-                timeout: 60000
-            }, (err, res, body) => {
-                if (err) {
-                    log.warn(`error fetching get pods result! ${res}`);
-                    reject();
-                }
-                log.log(`Get pods from ${this.namespace}: ${body}`);
-                resolve(body);
-            })
-        });
+        this.namespace = "sutan-che";
 
     }
 
@@ -35,6 +20,17 @@ class Scratch3K8sBlocks {
             id: 'k8s',
             name: 'Kubernetes',
             blocks: [
+                {
+                    opcode: 'setNamespace',
+                    blockType: BlockType.COMMAND,
+                    text: 'setNamespace [NAMESPACE]',
+                    arguments: {
+                        NAMESPACE: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "sutan-che"
+                        }
+                    }
+                },
                 {
                     opcode: 'getPods',
                     blockType: BlockType.REPORTER,
@@ -78,19 +74,6 @@ class Scratch3K8sBlocks {
                         }
                     }
                 },
-
-
-                {
-                    opcode: 'setNamespace',
-                    blockType: BlockType.COMMAND,
-                    text: 'Set namespace [NAMESPACE]',
-                    arguments: {
-                        NAMESPACE: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "che"
-                        }
-                    }
-                }
             ],
             menus: {
             }
@@ -98,7 +81,20 @@ class Scratch3K8sBlocks {
     }
 
     getPods(args) {
-        return this.getPodsPromise; //.then(pods => { log.log(`bouhhh ${pods}`); return pods[0].metadata.name;});
+        return new Promise((resolve, reject) => {
+            nets({
+                url: urlBase.replace("http://", "https://") // quick dirty fix should use https
+                    + (urlBase.endsWith("/") ? "" : "/") + this.namespace,
+                timeout: 60000
+            }, (err, res, body) => {
+                if (err) {
+                    log.warn(`error fetching get pods result! ${res}`);
+                    reject();
+                }
+                log.log(`Get pods from ${this.namespace}: ${body}`);
+                resolve(body);
+            })
+        });
     }
 
     getPodListSize(args) {
@@ -121,7 +117,6 @@ class Scratch3K8sBlocks {
         const pod = JSON.parse(podJson);
         return pod.metadata.name;
     }
-
 
 
     setNamespace(args) {
