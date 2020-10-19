@@ -130,7 +130,7 @@ class Scratch3K8sBlocks {
                 timeout: 60000
             }, (err, res, body) => {
                 if (err) {
-                    log.warn(`error fetching get pods result! ${res}`);
+                    log.warn(`error setting namspace! ${res}`);
                     reject();
                 }
                 resolve(body);
