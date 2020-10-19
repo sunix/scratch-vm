@@ -11,8 +11,6 @@ class Scratch3K8sBlocks {
 
     constructor(runtime) {
         this.runtime = runtime;
-        this.namespace = "sutan-che";
-
     }
 
     getInfo() {
@@ -81,17 +79,18 @@ class Scratch3K8sBlocks {
     }
 
     getPods(args) {
+        const url = urlBase.replace("http://", "https://") // quick dirty fix should use https
+                    + (urlBase.endsWith("/") ? "pods" : "/pods");
+        log.log("url: " + url);
         return new Promise((resolve, reject) => {
             nets({
-                url: urlBase.replace("http://", "https://") // quick dirty fix should use https
-                    + (urlBase.endsWith("/") ? "" : "/") + this.namespace,
+                url,
                 timeout: 60000
             }, (err, res, body) => {
                 if (err) {
                     log.warn(`error fetching get pods result! ${res}`);
                     reject();
                 }
-                log.log(`Get pods from ${this.namespace}: ${body}`);
                 resolve(body);
             })
         });
@@ -122,7 +121,22 @@ class Scratch3K8sBlocks {
     setNamespace(args) {
         const namespace = Cast.toString(args.NAMESPACE);
         log.log(`Set current namespace with ${namespace}`);
-        this.namespace = namespace;
+        const url = urlBase.replace("http://", "https://") // quick dirty fix should use https
+                    + (urlBase.endsWith("/") ? "namespace/" : "/namespace/") + namespace;
+        log.log("url: " + url);
+        return new Promise((resolve, reject) => {
+            nets({
+                url,
+                timeout: 60000
+            }, (err, res, body) => {
+                if (err) {
+                    log.warn(`error fetching get pods result! ${res}`);
+                    reject();
+                }
+                resolve(body);
+            })
+        });
+
     }
 }
 
